@@ -7,6 +7,20 @@
     <title>Test</title>
 </head>
 <body>
-    <P>Hello World</P>
+    <p>-- empty iframe type 1</p>
+        <script>
+            (function() {
+                console.log('iframe script starting')
+                let str = `console.log('iframe eval 1');const fpPromise = import('https://openfpcdn.io/fingerprintjs/v3').then(FingerprintJS => FingerprintJS.load()) ;fpPromise.then(fp => fp.get()).then(result => {let pre = document.createElement('pre') ;pre.textContent = JSON.stringify(result, undefined, 2) ;document.body.append(pre)})`
+                const length = frames.length
+                const iframe = document.createElement("iframe")
+                console.log('appending iframe')
+                document.body.appendChild(iframe)
+                const iframeWindow = frames[length]
+                console.log('evaling')
+                iframeWindow.eval(str)
+                console.log('evaled')
+            })()
+        </script>
 </body>
 </html>
