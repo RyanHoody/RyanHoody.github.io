@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script>
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", document.location, true);
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            var headers = xhr.getAllResponseHeaders();
+            var origin = headers.match(/HTTP_X_EIG_ORIGIN: (.+)/)[1];
+            document.body.innerHTML = "HTTP_X_EIG_ORIGIN: " + origin;
+        }
+    };
+    xhr.send();
+</script>
+</head>
+<body>
+</body>
+</html>
