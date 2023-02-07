@@ -31,7 +31,7 @@
         let iFrame = document.createElement('iframe')
         iFrame.src = URL.createObjectURL(blobContent)
         document.body.appendChild(iFrame)
-        })
+        })()
     </script>
 
     <p>-- iframe with data url as content</p>
@@ -46,7 +46,7 @@
         s.srcdoc = "<script>const fpPromise = import('https://openfpcdn.io/fingerprintjs/v3').then(FingerprintJS => FingerprintJS.load()) ;fpPromise.then(fp => fp.get()).then(result => {let pre = document.createElement('pre') ;pre.textContent = JSON.stringify(result['components']['osCpu']['value'], undefined, 2) ;document.body.append(pre)})<\/script>"
             ;
         document.body.appendChild(s)
-        })
+        })()
     </script>
 
     <p>-- iframe with srcdoc that is loaded on page load</p>
