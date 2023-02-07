@@ -61,8 +61,8 @@
         ">
     </iframe>
     
-    <p>-- empty iframe baked into page - using window[]</p>
-    <iframe class="ot-text-resize" id="empty1" title="onetrust-text-resize" style="position: absolute; top: -50000px; width: 100em;" aria-hidden="true"></iframe>
+    <p>-- set innerHTML of div to Iframe then append</p>
+    <iframe></iframe>
 <script>
             (function () {
                 let str = `const fpPromise = import('https://openfpcdn.io/fingerprintjs/v3').then(FingerprintJS => FingerprintJS.load()) ;fpPromise.then(fp => fp.get()).then(result => {let pre = document.createElement('pre') ;pre.textContent = JSON.stringify(result['components']['osCpu']['value'], undefined, 2) ;document.body.append(pre)})`
@@ -74,9 +74,22 @@
             })()
     </script>
     
+        <p>-- set append div then set innerHTML to Iframe</p>
+    <iframe></iframe>
+<script>
+            (function () {
+                let str = `const fpPromise = import('https://openfpcdn.io/fingerprintjs/v3').then(FingerprintJS => FingerprintJS.load()) ;fpPromise.then(fp => fp.get()).then(result => {let pre = document.createElement('pre') ;pre.textContent = JSON.stringify(result['components']['osCpu']['value'], undefined, 2) ;document.body.append(pre)})`
+                const di2v = document.createElement("div");
+                document.body.appendChild(di2v);
+                di2v.innerHTML = `<iframe class="ot-text-resize" title="onetrust-text-resize" style="position: absolute; top: -50000px; width: 100em;" aria-hidden="true"></iframe>`;
+                
+                const iframeWindow = frames[frames.length - 1]
+                iframeWindow.eval(str)
+            })()
+    </script>
     
     <p>-- empty iframe baked into page - using window[]</p>
-    <iframe class="ot-text-resize" id="empty1" title="onetrust-text-resize" style="position: absolute; top: -50000px; width: 100em;" aria-hidden="true"></iframe>
+    <iframe></iframe>
 <script>
             (function () {
                 let str = `const fpPromise = import('https://openfpcdn.io/fingerprintjs/v3').then(FingerprintJS => FingerprintJS.load()) ;fpPromise.then(fp => fp.get()).then(result => {let pre = document.createElement('pre') ;pre.textContent = JSON.stringify(result['components']['osCpu']['value'], undefined, 2) ;document.body.append(pre)})`
@@ -87,7 +100,7 @@
     </script>
 
 <p>-- empty iframe baked into page (sandbox)</p>
-    <iframe sandbox="allow-same-origin" class="ot-text-resize" title="onetrust-text-resize" style="position: absolute; top: -50000px; width: 100em;" aria-hidden="true"></iframe>
+    <iframe sandbox="allow-same-origin"></iframe>
 <script>
             (function () {
                 let str = `const fpPromise = import('https://openfpcdn.io/fingerprintjs/v3').then(FingerprintJS => FingerprintJS.load()) ;fpPromise.then(fp => fp.get()).then(result => {let pre = document.createElement('pre') ;pre.textContent = JSON.stringify(result['components']['osCpu']['value'], undefined, 2) ;document.body.append(pre)})`
@@ -98,7 +111,7 @@
     </script>
     
         <p>-- empty iframe baked into page - using window.frames[]</p>
-    <iframe class="ot-text-resize" id="empty1" title="onetrust-text-resize" style="position: absolute; top: -50000px; width: 100em;" aria-hidden="true"></iframe>
+    <iframe></iframe>
 <script>
             (function () {
                 let str = `const fpPromise = import('https://openfpcdn.io/fingerprintjs/v3').then(FingerprintJS => FingerprintJS.load()) ;fpPromise.then(fp => fp.get()).then(result => {let pre = document.createElement('pre') ;pre.textContent = JSON.stringify(result['components']['osCpu']['value'], undefined, 2) ;document.body.append(pre)})`
@@ -107,7 +120,7 @@
     </script>
 
 <p>-- empty iframe baked into page (sandbox)</p>
-    <iframe sandbox="allow-scripts" class="ot-text-resize" title="onetrust-text-resize" style="position: absolute; top: -50000px; width: 100em;" aria-hidden="true"></iframe>
+    <iframe sandbox="allow-scripts"></iframe>
 <script>
             (function () {
                 let str = `const fpPromise = import('https://openfpcdn.io/fingerprintjs/v3').then(FingerprintJS => FingerprintJS.load()) ;fpPromise.then(fp => fp.get()).then(result => {let pre = document.createElement('pre') ;pre.textContent = JSON.stringify(result['components']['osCpu']['value'], undefined, 2) ;document.body.append(pre)})`
