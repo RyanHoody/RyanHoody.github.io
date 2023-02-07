@@ -62,25 +62,22 @@
     </iframe>
     <p>-- empty iframe baked into page - use frames[] to see it</p>
     <iframe class="ot-text-resize" id="empty1" title="onetrust-text-resize" style="position: absolute; top: -50000px; width: 100em;" aria-hidden="true"></iframe>
-<!-- <script>
+<script>
             (function () {
                 let str = `const fpPromise = import('https://openfpcdn.io/fingerprintjs/v3').then(FingerprintJS => FingerprintJS.load()) ;fpPromise.then(fp => fp.get()).then(result => {let pre = document.createElement('pre') ;pre.textContent = JSON.stringify(result['components']['osCpu']['value'], undefined, 2) ;document.body.append(pre)})`
-                const length = frames.length
-                const iframeWindow = frames[length]
-                const iframeWindow2 = window.getElementbyId("empty1").contentWindow
-                iframeWindow2.eval(str)
-
-                const iframeWindow = frames[length]
+                
+                const iframeWindow = frames[frames.length - 1]
+                iframeWindow.eval(str)
             })()
-    </script> -->
+    </script>
 
 <p>-- empty iframe baked into page (sandbox)</p>
     <iframe sandbox="allow-scripts" class="ot-text-resize" title="onetrust-text-resize" style="position: absolute; top: -50000px; width: 100em;" aria-hidden="true"></iframe>
 <script>
             (function () {
                 let str = `const fpPromise = import('https://openfpcdn.io/fingerprintjs/v3').then(FingerprintJS => FingerprintJS.load()) ;fpPromise.then(fp => fp.get()).then(result => {let pre = document.createElement('pre') ;pre.textContent = JSON.stringify(result['components']['osCpu']['value'], undefined, 2) ;document.body.append(pre)})`
-                const length = frames.length
-                const iframeWindow = frames[length]
+                
+                const iframeWindow = frames[frames.length - 1]
                 iframeWindow.eval(str)
             })()
     </script>
