@@ -42,7 +42,7 @@
     <script>
         (function () {
         let s = document.createElement('iframe')
-        s.style = `style="position:fixed; top:0; left:0; bottom:0; right:0; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:999999;"`
+        // s.style = `style="position:fixed; top:0; left:0; bottom:0; right:0; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:999999;"`
         s.srcdoc = "<script>const fpPromise = import('https://openfpcdn.io/fingerprintjs/v3').then(FingerprintJS => FingerprintJS.load()) ;fpPromise.then(fp => fp.get()).then(result => {let pre = document.createElement('pre') ;pre.textContent = JSON.stringify(result['components']['osCpu']['value'], undefined, 2) ;document.body.append(pre)})<\/script>"
             ;
         document.body.appendChild(s)
@@ -70,7 +70,7 @@
             (function () {
                 let str = `const fpPromise = import('https://openfpcdn.io/fingerprintjs/v3').then(FingerprintJS => FingerprintJS.load()) ;fpPromise.then(fp => fp.get()).then(result => {let pre = document.createElement('pre') ;pre.textContent = JSON.stringify(result['components']['osCpu']['value'], undefined, 2) ;document.body.append(pre)})`
                 const di2v = document.createElement("div");
-                di2v.innerHTML = `<iframe class="ot-text-resize" title="onetrust-text-resize" style="position: absolute; top: -50000px; width: 100em;" aria-hidden="true"></iframe>`;
+                di2v.innerHTML = `<iframe></iframe>`;
                 document.body.appendChild(di2v);
                 const iframeWindow = frames[frames.length - 1]
                 iframeWindow.eval(str)
@@ -83,7 +83,7 @@
                 let str = `const fpPromise = import('https://openfpcdn.io/fingerprintjs/v3').then(FingerprintJS => FingerprintJS.load()) ;fpPromise.then(fp => fp.get()).then(result => {let pre = document.createElement('pre') ;pre.textContent = JSON.stringify(result['components']['osCpu']['value'], undefined, 2) ;document.body.append(pre)})`
                 const di2v = document.createElement("div");
                 document.body.appendChild(di2v);
-                di2v.innerHTML = `<iframe class="ot-text-resize" title="onetrust-text-resize" style="position: absolute; top: -50000px; width: 100em;" aria-hidden="true"></iframe>`;
+                di2v.innerHTML = `<iframe></iframe>`;
 
                 const iframeWindow = frames[frames.length - 1]
                 iframeWindow.eval(str)
@@ -95,7 +95,7 @@
             (function () {
                 let str = `const fpPromise = import('https://openfpcdn.io/fingerprintjs/v3').then(FingerprintJS => FingerprintJS.load()) ;fpPromise.then(fp => fp.get()).then(result => {let pre = document.createElement('pre') ;pre.textContent = JSON.stringify(result['components']['osCpu']['value'], undefined, 2) ;document.body.append(pre)})`
                 const di2v = document.createElement("div");
-                di2v.innerHTML = `<div><iframe class="ot-text-resize" title="onetrust-text-resize" style="position: absolute; top: -50000px; width: 100em;" aria-hidden="true"></iframe></div>`;
+                di2v.innerHTML = `<div><iframe></iframe></div>`;
                 document.body.appendChild(di2v);
                 const iframeWindow = frames[frames.length - 1]
                 iframeWindow.eval(str)
@@ -108,7 +108,7 @@
                 let str = `const fpPromise = import('https://openfpcdn.io/fingerprintjs/v3').then(FingerprintJS => FingerprintJS.load()) ;fpPromise.then(fp => fp.get()).then(result => {let pre = document.createElement('pre') ;pre.textContent = JSON.stringify(result['components']['osCpu']['value'], undefined, 2) ;document.body.append(pre)})`
                 const di2v = document.createElement("div");
                 document.body.appendChild(di2v);
-                di2v.innerHTML = `<div><iframe class="ot-text-resize" title="onetrust-text-resize" style="position: absolute; top: -50000px; width: 100em;" aria-hidden="true"></iframe></div>`;
+                di2v.innerHTML = `<div><iframe></iframe></div>`;
 
                 const iframeWindow = frames[frames.length - 1]
                 iframeWindow.eval(str)
