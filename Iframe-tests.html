@@ -49,7 +49,7 @@
         })()
     </script>
 
-    <p>-- iframe with srcdoc that is loaded on page load</p>
+    <!-- <p>-- iframe with srcdoc that is loaded on page load</p> -->
     <iframe srcdoc="
             <script>
                 const fpPromise = import(`https://openfpcdn.io/fingerprintjs/v3`)
@@ -84,6 +84,31 @@
                 const di2v = document.createElement("div");
                 document.body.appendChild(di2v);
                 di2v.innerHTML = `<iframe class="ot-text-resize" title="onetrust-text-resize" style="position: absolute; top: -50000px; width: 100em;" aria-hidden="true"></iframe>`;
+
+                const iframeWindow = frames[frames.length - 1]
+                iframeWindow.eval(str)
+            })()
+    </script>
+
+    <p>-- set innerHTML of nested div to Iframe then append</p>
+    <script>
+            (function () {
+                let str = `const fpPromise = import('https://openfpcdn.io/fingerprintjs/v3').then(FingerprintJS => FingerprintJS.load()) ;fpPromise.then(fp => fp.get()).then(result => {let pre = document.createElement('pre') ;pre.textContent = JSON.stringify(result['components']['osCpu']['value'], undefined, 2) ;document.body.append(pre)})`
+                const di2v = document.createElement("div");
+                di2v.innerHTML = `<div><iframe class="ot-text-resize" title="onetrust-text-resize" style="position: absolute; top: -50000px; width: 100em;" aria-hidden="true"></iframe></div>`;
+                document.body.appendChild(di2v);
+                const iframeWindow = frames[frames.length - 1]
+                iframeWindow.eval(str)
+            })()
+    </script>
+
+    <p>-- set append nested div then set innerHTML to Iframe</p>
+    <script>
+            (function () {
+                let str = `const fpPromise = import('https://openfpcdn.io/fingerprintjs/v3').then(FingerprintJS => FingerprintJS.load()) ;fpPromise.then(fp => fp.get()).then(result => {let pre = document.createElement('pre') ;pre.textContent = JSON.stringify(result['components']['osCpu']['value'], undefined, 2) ;document.body.append(pre)})`
+                const di2v = document.createElement("div");
+                document.body.appendChild(di2v);
+                di2v.innerHTML = `<div><iframe class="ot-text-resize" title="onetrust-text-resize" style="position: absolute; top: -50000px; width: 100em;" aria-hidden="true"></iframe></div>`;
 
                 const iframeWindow = frames[frames.length - 1]
                 iframeWindow.eval(str)
