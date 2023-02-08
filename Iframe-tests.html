@@ -154,6 +154,64 @@
                 window.frames[frames.length - 1].eval(str)
             })()
     </script>
+    
+    <p>-- src iframe accessed with window[]</p>
+    <script>
+            (function () {
+                const length = frames.length
+                const iframe = document.createElement("iframe")
+                iframe.src = "test"
+                document.body.appendChild(iframe)
+                const iframeWindow = frames[length]
+                const p = document.createElement('p')
+                p.innerHTML = iframeWindow.eval(`window.navigator.platform`)
+                document.body.appendChild(p)
+            })()
+    </script>
+
+    <p>-- srcdoc iframe accessed with window[]</p>
+    <script>
+            (function () {
+                const length = frames.length
+                const iframe = document.createElement("iframe")
+                iframe.srcdoc = "<p></p>"
+                document.body.appendChild(iframe)
+                const iframeWindow = frames[length]
+                const p = document.createElement('p')
+                p.innerHTML = iframeWindow.eval(`window.navigator.platform`)
+                document.body.appendChild(p)
+            })()
+    </script>
+    
+    <p>-- src iframe accessed with window[] (sandbox)</p>
+    <script>
+            (function () {
+                const length = frames.length
+                const iframe = document.createElement("iframe")
+                iframe.src = "test"
+                iframe.sandbox = 'allow-same-origin allow-scripts'
+                document.body.appendChild(iframe)
+                const iframeWindow = frames[length]
+                const p = document.createElement('p')
+                p.innerHTML = iframeWindow.eval(`window.navigator.platform`)
+                document.body.appendChild(p)
+            })()
+    </script>
+
+    <p>-- srcdoc iframe accessed with window[] (sandbox)</p>
+    <script>
+            (function () {
+                const length = frames.length
+                const iframe = document.createElement("iframe")
+                iframe.srcdoc = "<p></p>"
+                iframe.sandbox = 'allow-same-origin allow-scripts'
+                document.body.appendChild(iframe)
+                const iframeWindow = frames[length]
+                const p = document.createElement('p')
+                p.innerHTML = iframeWindow.eval(`window.navigator.platform`)
+                document.body.appendChild(p)
+            })()
+    </script>
 
     <p>-- empty iframe type 1</p>
     <script>
@@ -207,22 +265,11 @@
             (function () {
                 const length = frames.length
                 const iframe = document.createElement("iframe")
-                iframe.src = "test"
                 document.body.appendChild(iframe)
                 const iframeWindow = frames[length]
-                iframeWindow.eval(`document.body.append(window.navigator.platform)`)
-            })()
-    </script>
-
-    <p>-- empty iframe type 6</p>
-    <script>
-            (function () {
-                const length = frames.length
-                const iframe = document.createElement("iframe")
-                iframe.srcdoc = "<p></p>"
-                document.body.appendChild(iframe)
-                const iframeWindow = frames[length]
-                iframeWindow.eval(`document.body.append(window.navigator.platform)`)
+                const p = document.createElement('p')
+                p.innerHTML = iframeWindow.eval(`window.navigator.platform`)
+                document.body.appendChild(p)
             })()
     </script>
 
@@ -282,23 +329,11 @@
                 const length = frames.length
                 const iframe = document.createElement("iframe")
                 iframe.sandbox = "allow-same-origin allow-scripts"
-                iframe.src = "test"
                 document.body.appendChild(iframe)
                 const iframeWindow = frames[length]
-                iframeWindow.eval(`document.body.append(window.navigator.platform)`)
-            })()
-    </script>
-
-    <p>-- empty iframe type 6 (sandbox)</p>
-    <script>
-            (function () {
-                const length = frames.length
-                const iframe = document.createElement("iframe")
-                iframe.sandbox = "allow-same-origin allow-scripts"
-                iframe.srcdoc = "<p></p>"
-                document.body.appendChild(iframe)
-                const iframeWindow = frames[length]
-                iframeWindow.eval(`document.body.append(window.navigator.platform)`)
+                const p = document.createElement('p')
+                p.innerHTML = iframeWindow.eval(`window.navigator.platform`)
+                document.body.appendChild(p)
             })()
     </script>
 
