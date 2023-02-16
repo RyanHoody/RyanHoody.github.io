@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SchemeURLs</title>
+</head>
+
+<body>
+    <script>
+        (async function () {
+            const popularWebsites = {
+                // "google.com": "https://www.google.com/favicon.ico",
+                "hoody.com": "https://hoody.com/assets/icons/favicons/hoody-favicon-32x32.png",
+                "youtube.com": "https://www.youtube.com/favicon.ico",
+                "amazon.com": "https://www.amazon.com/favicon.ico",
+                "angular": "https://angularjs.org/favicon.ico",
+                "cnn.com": "https://edition.cnn.com/favicon.ie9.ico",
+                "stackoverflow.com": "https://cdn.sstatic.net/Sites/stackoverflow/Img/favicon.ico",
+                "angular": "https://angularjs.org/favicon.ico",
+            }
+
+            const appURLs = {
+                "Telegram": "tg://",
+                "Discord": "discord://",
+                "Spotify": "spotify://",
+                "WhatsApp": "whatsapp://",
+                "Skype": "skype://",
+                "Slack": "slack:",
+                "Itunes": "itms://",
+                "Figma": "figma://",
+                // "Excel": "ms-excel://",
+                "VSCode": "vscode://",
+                // "Opera": "opera://",
+                "Microsoft Edge": "microsoft-edge://",
+                // "Git": "git://",
+                "Steam": "steam://",
+            }
+            //Opening a ton of windows on mobile would be really bad UX
+            // const mobileOnlySchemeURLs = {
+            // "Google Play": "market://",
+            //     "Twitter": "twitter://",
+            //     "Facebook": "fb://",
+            //     "Instagram": "instagram://",
+            //     "YouTube": "youtube://",
+            //     "WhatsApp": "whatsapp://",
+            // },
+
+            const cryptoSchemeURLs = [
+                "bitcoin://",
+                "ethereum://",
+                // "bitcoincash://"
+            ]
+
+            const torrentSchemeURL = 'magent://'
+
+            const osSchemeURLs = {
+                windows: {
+                    "Windows streaming media": "mms://",
+                    "Windows Camera": "microsoft.windows.camera://",
+                    "Windows Wifi": "ms-settings-wifi://",
+                },
+                //! May not work on Apple: https://stackoverflow.com/questions/20696041/window-openurl-blank-not-working-on-imac-safari
+                apple: {
+                    "Facetime": "facetime://",
+                    // "Apple File Protocol": "afp://",
+                    "Safari": "safari://"
+                },
+            }
+
+            let timeout = 2000
+
+            function attemptWindowClose(_window, resolveFn, resolveData) {
+                try {
+                    _window.close()
+                    setInterval(() => {
+                        try {
+                            _window.document.body
+                        } catch (e) {
+                            resolveFn(resolveData)
+                        }
+                    }, 5)
+                } catch (e) {
+                    resolveFn(resolveData)
+                }
+            }
+
+            function testPopup(URL) {
+                return new Promise((resolve) => {
+                    const newWindow = window.open('/', '_blank', "width=100,height=100,toolbar=no,location=no,status=no,left=100000,top=100000")
+                    setTimeout(() => {
+                        attemptWindowClose(newWindow, resolve, 0)
+                    }, timeout);
+                    let startTime = performance.now()
+                    newWindow.location.href = URL
+                    const timer = setInterval(() => {
+                        try {
+                            newWindow.location.href
+                        } catch (e) {
+                            clearInterval(timer)
+                            attemptWindowClose(newWindow, resolve, Math.round(performance.now() - startTime))
+                        }
+                    }, 1)
+                })
+            }
+
+            // async function collectBrowsingData() {
+            //     const resultsSummary = {}
+            //     for (let [name, URL] of Object.entries(popularWebsites)) {
+            //         const res = await hasVisitedSite(name, URL)
+            //         resultsSummary[name] = res > 80 ? 'visited' : res > 55 ? 'probably visited' : res > 30 ? 'unlikely visited' : 'didnt visit'
+            //         await new Promise(res => setTimeout(() => res(), 200))
+            //     }
+            //     return resultsSummary
+            // }
+            async function collectBrowsingData() {
+                const resultsSummary = {}
+                const promises = []
+
+                async function hasVisitedSite(name, URL) {
+                    const run1Time = await testPopup(URL)
+                    await new Promise(res => setTimeout(() => res(), 100))
+                    const run2Time = await testPopup(URL)
+                    const run3Time = await testPopup(URL)
+                    const avg = (run2Time + run3Time)/2
+                    const res = Math.round(100 - (Math.min(Math.max((run1Time - avg) / run1Time, 0), 1) * 100))
+                    console.log(name);
+                    console.log(run1Time + 'ms -> ' + avg + 'ms : ' + res + ' %');
+                    timeout = Math.max(run1Time * 2, timeout)
+                    resultsSummary[name] = res > 80 ? 'visited' : res > 55 ? 'probably visited' : res > 30 ? 'unlikely visited' : 'didnt visit'
+                }
+
+                for (let [name, URL] of Object.entries(popularWebsites)) {
+                    promises.push(hasVisitedSite(name, URL))
+                    // await new Promise(res => setTimeout(() => res(), 200))
+                }
+                await Promise.all(promises)
+                return resultsSummary
+            }
+
+            window.addEventListener("click", async (event) => {
+                try {
+                    console.log(await collectBrowsingData())
+                    console.log(await collectApps())
+                } catch (error) {
+                    console.log('Popups probably blocked', error);
+                }
+            });
+
+            async function collectApps() {
+                if (!(typeof window.opener !== 'undefined' && window.opener !== null)) {//if we want it to run automatically and not on user click
+                    const TIMEOUT = 800
+                    const userTraits = {
+                        os: 'unknown',
+                        cryptoUser: false,
+                        torrentUser: false,
+                        apps: []
+                    }
+
+                    //OS
+                    for (let [collectionName, schemeURLCollection] of Object.entries(osSchemeURLs)) {
+                        if (userTraits.os === 'unknown') {
+                            for (let URL of Object.values(schemeURLCollection)) {
+                                if (await hasApp(URL)) {
+                                    userTraits.os = collectionName
+                                    break
+                                }
+                                await new Promise(res => setTimeout(() => res(), TIMEOUT))
+                            }
+                        }
+                    }
+
+                    //Apps 
+                    for (let [name, URL] of Object.entries(appURLs)) {
+                        if (await hasApp(URL)) {
+                            userTraits.apps.push(name)
+                        }
+                        await new Promise(res => setTimeout(() => res(), TIMEOUT))
+                    }
+
+                    //Torrent user
+                    userTraits.torrentUser = await hasApp(torrentSchemeURL)
+                    await new Promise(res => setTimeout(() => res(), TIMEOUT))
+
+                    //Crypto user
+                    for (let URL of cryptoSchemeURLs) {
+                        if (await hasApp(URL)) {
+                            userTraits.cryptoUser = true
+                            break
+                        }
+                        await new Promise(res => setTimeout(() => res(), TIMEOUT))
+                    }
+                    console.log(userTraits);
+                }
+            }
+
+            async function hasApp(name) {
+                return new Promise((resolve, reject) => {
+                    let windowClosed = false
+                    let found = false
+                    const newWindow = window.open('/', '_blank', "width=100,height=100,toolbar=no,location=no,status=no,left=100000,top=100000")
+                    const tempInput = newWindow.document.createElement('input')
+                    newWindow.document.body.append(tempInput)
+                    tempInput.focus()
+                    tempInput.addEventListener('blur', (event) => {
+                        if (!windowClosed) {
+                            found = true
+                            attemptWindowClose(newWindow, resolve, found)
+                        }
+                    }, true);
+                    setTimeout(function () {
+                        windowClosed = true
+                        attemptWindowClose(newWindow, resolve, found)
+                    }, 200)
+                    newWindow.document.location.href = name
+                })
+            }
+        })();
+    </script>
+</body>
+
+</html>
