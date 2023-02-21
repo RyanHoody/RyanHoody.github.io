@@ -26,12 +26,12 @@
 
     <p>-- iframe with blob url as content</p>
     <script>
-        (function () {
-        const blobContent = new Blob(["<script>const fpPromise = import('https://openfpcdn.io/fingerprintjs/v3').then(FingerprintJS => FingerprintJS.load()) ;fpPromise.then(fp => fp.get()).then(result => {let pre = document.createElement('pre') ;pre.textContent = JSON.stringify(result['components']['osCpu']['value'], undefined, 2) ;document.body.append(pre)})<\/script>"], { type: 'text/html' })
-        let iFrame = document.createElement('iframe')
-        iFrame.src = URL.createObjectURL(blobContent)
-        document.body.appendChild(iFrame)
-        })()
+            (function () {
+                const blobContent = new Blob(["<script>const fpPromise = import('https://openfpcdn.io/fingerprintjs/v3').then(FingerprintJS => FingerprintJS.load()) ;fpPromise.then(fp => fp.get()).then(result => {let pre = document.createElement('pre') ;pre.textContent = JSON.stringify(result['components']['osCpu']['value'], undefined, 2) ;document.body.append(pre)})<\/script>"], { type: 'text/html' })
+                let iFrame = document.createElement('iframe')
+                iFrame.src = URL.createObjectURL(blobContent)
+                document.body.appendChild(iFrame)
+            })()
     </script>
 
     <p>-- iframe with data url as content</p>
@@ -40,13 +40,13 @@
 
     <p>-- iframe is created and filled with js</p>
     <script>
-        (function () {
-        let s = document.createElement('iframe')
-        // s.style = `style="position:fixed; top:0; left:0; bottom:0; right:0; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:999999;"`
-        s.srcdoc = "<script>const fpPromise = import('https://openfpcdn.io/fingerprintjs/v3').then(FingerprintJS => FingerprintJS.load()) ;fpPromise.then(fp => fp.get()).then(result => {let pre = document.createElement('pre') ;pre.textContent = JSON.stringify(result['components']['osCpu']['value'], undefined, 2) ;document.body.append(pre)})<\/script>"
-            ;
-        document.body.appendChild(s)
-        })()
+            (function () {
+                let s = document.createElement('iframe')
+                // s.style = `style="position:fixed; top:0; left:0; bottom:0; right:0; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:999999;"`
+                s.srcdoc = "<script>const fpPromise = import('https://openfpcdn.io/fingerprintjs/v3').then(FingerprintJS => FingerprintJS.load()) ;fpPromise.then(fp => fp.get()).then(result => {let pre = document.createElement('pre') ;pre.textContent = JSON.stringify(result['components']['osCpu']['value'], undefined, 2) ;document.body.append(pre)})<\/script>"
+                    ;
+                document.body.appendChild(s)
+            })()
     </script>
 
     <p>-- iframe with srcdoc that is loaded on page load</p>
@@ -61,6 +61,69 @@
                     pre.textContent = JSON.stringify(result['components']['osCpu']['value'], undefined, 2)
                     document.body.append(pre)
                 })
+            </script>
+        ">
+    </iframe>
+
+    <p>-- shadowroot open</p>
+
+    <script>
+            (function () {
+                const div = document.createElement('div')
+                const shadowOpen = div.attachShadow({ mode: 'open' });
+                const ifr = document.createElement('iframe')
+                ifr.srcdoc = `const fpPromise = import('https://openfpcdn.io/fingerprintjs/v3')
+                .then(FingerprintJS => FingerprintJS.load())
+                fpPromise
+                .then(fp => fp.get())
+                .then(result => {
+                    let pre = document.createElement('pre')
+                    pre.textContent = JSON.stringify(result['components']['osCpu']['value'], undefined, 2)
+                    document.body.append(pre)
+                })`
+                shadowOpen.appendChild(ifr)
+            })()
+    </script>
+
+    <p>-- shadowroot closed</p>
+
+    <script>
+            (function () {
+                const div = document.createElement('div')
+                const shadowClosed = div.attachShadow({ mode: 'closed' });
+                const ifr = document.createElement('iframe')
+                ifr.srcdoc = `<script>const fpPromise = import('https://openfpcdn.io/fingerprintjs/v3')
+                .then(FingerprintJS => FingerprintJS.load())
+                fpPromise
+                .then(fp => fp.get())
+                .then(result => {
+                    let pre = document.createElement('pre')
+                    pre.textContent = JSON.stringify(result['components']['osCpu']['value'], undefined, 2)
+                    document.body.append(pre)
+                })<\/script>`
+                shadowClosed.appendChild(ifr)
+                document.body.append(div)
+            })()
+    </script>
+
+
+    <p>-- shadowroot inside iframe</p>
+    <iframe srcdoc="
+            <script>
+                const div = document.createElement('div')
+                const shadowOpen = div.attachShadow({ mode: 'open' });
+                const ifr = document.createElement('iframe')
+                ifr.srcdoc = `const fpPromise = import(\`https://openfpcdn.io/fingerprintjs/v3\`)
+                .then(FingerprintJS => FingerprintJS.load())
+                fpPromise
+                .then(fp => fp.get())
+                .then(result => {
+                    let pre = document.createElement('pre')
+                    pre.textContent = JSON.stringify(result['components']['osCpu']['value'], undefined, 2)
+                    document.body.append(pre)
+                })`
+                shadowOpen.appendChild(ifr)
+                document.body.append(div)
             </script>
         ">
     </iframe>
@@ -154,7 +217,7 @@
                 window.frames[frames.length - 1].eval(str)
             })()
     </script>
-    
+
     <p>-- src iframe accessed with window[]</p>
     <script>
             (function () {
@@ -182,7 +245,7 @@
                 document.body.appendChild(p)
             })()
     </script>
-    
+
     <p>-- src iframe accessed with window[] (sandbox)</p>
     <script>
             (function () {
