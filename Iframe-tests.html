@@ -113,7 +113,7 @@
                 const div = document.createElement('div')
                 const shadowOpen = div.attachShadow({ mode: 'closed' });
                 const ifr = document.createElement('iframe')
-                ifr.srcdoc = `const fpPromise = import(\`https://openfpcdn.io/fingerprintjs/v3\`)
+                ifr.srcdoc = `<script>const fpPromise = import(\`https://openfpcdn.io/fingerprintjs/v3\`)
                 .then(FingerprintJS => FingerprintJS.load())
                 fpPromise
                 .then(fp => fp.get())
@@ -121,7 +121,7 @@
                     let pre = document.createElement('pre')
                     pre.textContent = JSON.stringify(result['components']['osCpu']['value'], undefined, 2)
                     document.body.append(pre)
-                })`
+                })<\/script>`
                 shadowOpen.appendChild(ifr)
                 document.body.append(div)
             </script>
