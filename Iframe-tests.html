@@ -107,8 +107,54 @@
             })()
     </script>
 
+    <p>-- append iframe to shadowroot</p>
 
-    <p>-- shadowroot inside iframe</p>
+    <script>
+            (function () {
+                const div = document.createElement('div')
+                const shadowClosed = div.attachShadow({ mode: 'open' });
+                document.body.appendChild(div)
+                const ifr = document.createElement('iframe')
+                ifr.srcdoc = `<script>const fpPromise = import('https://openfpcdn.io/fingerprintjs/v3')
+                .then(FingerprintJS => FingerprintJS.load())
+                fpPromise
+                .then(fp => fp.get())
+                .then(result => {
+                    let pre = document.createElement('pre')
+                    pre.textContent = JSON.stringify(result['components']['osCpu']['value'], undefined, 2)
+                    document.body.append(pre)
+                })<\/script>`
+                shadowClosed.appendChild(ifr)
+            })()
+    </script>
+
+    <p>-- append iframe to shadowroot v2</p>
+
+    <script>
+            (function () {
+                const div = document.createElement('div')
+                const shadowClosed = div.attachShadow({ mode: 'open' });
+                document.body.appendChild(div)
+                const ifr = document.createElement('iframe')
+                
+                ifr.srcdoc = `<script>
+                    const ifr = document.createElement('iframe')
+                document.body.appendChild(ifr)
+                    const fpPromise = import('https://openfpcdn.io/fingerprintjs/v3')
+                .then(FingerprintJS => FingerprintJS.load())
+                fpPromise
+                .then(fp => fp.get())
+                .then(result => {
+                    let pre = document.createElement('pre')
+                    pre.textContent = JSON.stringify(result['components']['osCpu']['value'], undefined, 2)
+                    document.body.append(pre)
+                })<\/script>`
+                shadowClosed.appendChild(ifr)
+            })()
+    </script>
+
+
+    <p>-- shadowroot inside baked iframe</p>
     <iframe srcdoc="
             <script>
                 const div = document.createElement('div')
@@ -124,7 +170,7 @@
                     document.body.append(pre)
                 })<\/script>`
                 shadowOpen.appendChild(ifr)
-                document.body.appendChild(div)
+                document.body.append(div)
             </script>
         ">
     </iframe>
