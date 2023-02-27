@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fingerprint test</title>
+    <style>
+        .fingerprintingIframe {
+            visibility: hidden;
+            position: absolute;
+            display: block !important;
+            width: 0px;
+            height: 0px;
+        }
+    </style>
+
+<body>
+    <button id="runTest">Begin Test</button>
+    <script>
+
+        function payload(description = '') {
+            return `
+        let sent = false;
+        try {
+            window.parent.postMessage({ result: JSON.stringify(window.navigator.platform), description: window.name + '${description}', dataCollection: true }, '*');
+            sent = true
+        } catch (e) { console.log(e) }
+
+        window.addEventListener('message', event => {
+            if (!sent) {
+                event.source.postMessage({ result: JSON.stringify(window.navigator.platform), description: window.name + '${description}', dataCollection: true }, '*');
+            }
+        });
+        `
+        }
+
+        var results = {
+            main: window.navigator.platform
+        }
+
+            ; (async function () {
+                const generateIframeHTML = function (options) {
+                    let str = '<iframe class="fingerprintingIframe"'
+                    if (options.src) str += ` src = "${options.src}"`
+                    if (options.srcdoc) str += ` srcdoc = "${options.srcdoc}"`
+                    if (options.sandbox) str += ` sandbox = "${options.sandbox}"`
+                    if (options.id) str += ` name = "${options.id}"`
+                    return str + '></iframe>'
+                }
+
+                const generateIframe = function (options) {
+                    const ifr = document.createElement('iframe')
+                    if (options.src) ifr.src = options.src
+                    if (options.srcdoc) ifr.srcdoc = options.srcdoc
+                    if (options.sandbox) ifr.sandbox = options.sandbox
+                    if (options.id) ifr.name = options.id
+                    ifr.style.setProperty('display', 'block', 'important') // Required for browsers to calculate the layout
+                    ifr.style.visibility = 'hidden'
+                    ifr.style.position = 'absolute'
+                    ifr.style.width = 0
+                    ifr.style.height = 0
+                    ifr.className = "fingerprintingIframe"
+                    return ifr
+                }
+
+                //covers tests
+                //shadowroot open
+                //shadowroot closed
+                //append iframe to shadowroot
+                /**
+                 * @param {object} options src, srcdoc, sandbox
+                 * @param {boolean} appendFirst if the div should be appended before converted 
+                 * @param {string} mode 'open' || 'closed, 'open' by default
+                 * @return {any} HTML Element
+                 */
+                const shadowrootIframe = function (options, appendFirst = false, mode = 'open') {
+                    const ifr = generateIframe(options)
+                    const div = document.createElement('div')
+                    const shadow = div.attachShadow({ mode });
+                    if (appendFirst) {
+                        document.body.appendChild(div)
+                        shadow.appendChild(ifr)
+                    } else {
+                        shadow.appendChild(ifr)
+                        document.body.appendChild(div)
+                    }
+                    return ifr
+                }
+
+                //covers tests
+                //set innerHTML of div to Iframe then append
+                //set append div then set innerHTML to Iframe
+                //set innerHTML of nested div to Iframe then append
+                //set append nested div then set innerHTML to Iframe
+                /**
+                 * @param {object} options src, srcdoc, sandbox
+                 * @param {boolean} appendFirst if the div should be appended before converted 
+                 * @param {boolean} nested nest iframe in another div
+                 * @return {any} HTML Element
+                 */
+                const divToIframe = function (options, appendFirst = false, nested = false) {
+                    const div = document.createElement("div");
+                    if (appendFirst) {
+                        document.body.appendChild(div);
+                    }
+                    if (nested) {
+                        div.innerHTML = `<div class="fingerprintingIframe">${generateIframeHTML(options)}</div>`;
+                    } else {
+                        div.innerHTML = generateIframeHTML(options);
+                    }
+                    if (!appendFirst) {
+                        document.body.appendChild(div);
+                    }
+                    return div
+                }
+
+                const collectionID = Date.now()
+
+                window.addEventListener('message', event => {
+                    if (event.data.dataCollection) {
+                        results[event.data.description] = JSON.parse(event.data.result)
+                    }
+                })
+
+                //todo
+                window.addEventListener('DOMNodeInsterted', node => {
+                    if (node.target.nodeName = 'IFRAME') {
+                        try {
+                            results[node.target.name + 'domnodeinserted'] = node.target.contentWindow.navigator.platform
+                        } catch (e) { console.log(e); }
+                    }
+                })
+
+                function runIframeTests() {
+                    const ifrs = []
+                    ifrs.push(generateIframe({ id: 'src', src: 'test' }))
+                    ifrs.push(generateIframe({ id: 'srcsandbox', src: 'test', sandbox: 'allow-same-origin allow-scripts' }))
+                    ifrs.push(generateIframe({ id: 'srcdoc', srcdoc: `<script>${payload}<\/script>` }))
+                    ifrs.push(generateIframe({ id: 'srcdocsandbox', srcdoc: `<script>${payload}<\/script>`, sandbox: 'allow-same-origin allow-scripts' }))
+                    ifrs.push(generateIframe({ id: 'blob', src: new Blob([`<script>${payload}<\/script>`]) }))
+                    ifrs.push(generateIframe({ id: 'blobsandbox', src: new Blob([`<script>${payload}<\/script>`]), sandbox: 'allow-same-origin allow-scripts' }))
+
+                    for (let ifr of ifrs) {
+                        document.body.appendChild(ifr)
+                        try {
+                            results[ifr.name + 'immediate[]'] = window[window.length - 1].navigator.platform
+                            // window[window.length - 1].eval(payload)
+                        } catch (e) { console.log(e); }
+                    }
+
+                    divToIframe({ id: 'emptydivtoiframe' })
+                    divToIframe({ id: 'emptydivtoiframeappendfirst' }, true)
+                    divToIframe({ id: 'emptydivtoiframeappendfirstnested' }, true, true)
+                    divToIframe({ id: 'emptydivtoiframenested' }, false, true)
+                    //TODO: CHANGE SANDBOX SETTINGS AND MAKE SRCDOC VERSION NOT JUST EMPTY IFRAMES 
+                    divToIframe({ id: 'emptydivtoiframesandbox', sandbox: 'allow-scripts allow-same-origin' })
+                    divToIframe({ id: 'emptydivtoiframeappendfirstsandbox', sandbox: 'allow-scripts allow-same-origin' }, true)
+                    divToIframe({ id: 'emptydivtoiframeappendfirstnestedsandbox', sandbox: 'allow-scripts allow-same-origin' }, true, true)
+                    divToIframe({ id: 'emptydivtoiframenestedsandbox', sandbox: 'allow-scripts allow-same-origin' }, false, true)
+
+                    shadowrootIframe({ id: 'shadowrootopen' })
+                    shadowrootIframe({ id: 'shadowrootclosed' }, false, 'closed')
+                    shadowrootIframe({ id: 'shadowrootappended' }, true)
+                }
+
+                const button = document.getElementById('runTest')
+                button.addEventListener('click', async () => {
+                    try {
+                        console.log(results);
+                    } catch (error) {
+                        console.log(error);
+                    }
+                })
+
+                runIframeTests()
+
+            })()
+    </script>
+    <iframe name="bakeddataurl" class="fingerprintingIframe"
+        src="data:text/html;charset=utf-8;base64,PHNjcmlwdD4NCmxldCBzZW50ID0gZmFsc2U7DQogICAgICAgIHRyeSB7DQogICAgICAgICAgICB3aW5kb3cucGFyZW50LnBvc3RNZXNzYWdlKHsgcmVzdWx0OiBKU09OLnN0cmluZ2lmeSh3aW5kb3cubmF2aWdhdG9yLnBsYXRmb3JtKSwgZGVzY3JpcHRpb246IHdpbmRvdy5pZCwgZGF0YUNvbGxlY3Rpb246IHRydWUgfSwgJyonKTsNCiAgICAgICAgICAgIHNlbnQgPSB0cnVlDQogICAgICAgIH0gY2F0Y2ggKGUpIHsgY29uc29sZS5sb2coZSkgfQ0KDQogICAgICAgIHdpbmRvdy5hZGRFdmVudExpc3RlbmVyKCdtZXNzYWdlJywgZXZlbnQgPT4gew0KICAgICAgICAgICAgaWYgKCFzZW50KSB7DQogICAgICAgICAgICAgICAgZXZlbnQuc291cmNlLnBvc3RNZXNzYWdlKHsgcmVzdWx0OiBKU09OLnN0cmluZ2lmeSh3aW5kb3cubmF2aWdhdG9yLnBsYXRmb3JtKSwgZGVzY3JpcHRpb246IHdpbmRvdy5pZCwgZGF0YUNvbGxlY3Rpb246IHRydWUgfSwgJyonKTsNCiAgICAgICAgICAgIH0NCiAgICAgICAgfSk7DQo8L3NjcmlwdD4="></iframe>
+    <iframe name="bakeddataurlsandbox" class="fingerprintingIframe"
+        src="data:text/html;charset=utf-8;base64,PHNjcmlwdD4NCmxldCBzZW50ID0gZmFsc2U7DQogICAgICAgIHRyeSB7DQogICAgICAgICAgICB3aW5kb3cucGFyZW50LnBvc3RNZXNzYWdlKHsgcmVzdWx0OiBKU09OLnN0cmluZ2lmeSh3aW5kb3cubmF2aWdhdG9yLnBsYXRmb3JtKSwgZGVzY3JpcHRpb246IHdpbmRvdy5pZCwgZGF0YUNvbGxlY3Rpb246IHRydWUgfSwgJyonKTsNCiAgICAgICAgICAgIHNlbnQgPSB0cnVlDQogICAgICAgIH0gY2F0Y2ggKGUpIHsgY29uc29sZS5sb2coZSkgfQ0KDQogICAgICAgIHdpbmRvdy5hZGRFdmVudExpc3RlbmVyKCdtZXNzYWdlJywgZXZlbnQgPT4gew0KICAgICAgICAgICAgaWYgKCFzZW50KSB7DQogICAgICAgICAgICAgICAgZXZlbnQuc291cmNlLnBvc3RNZXNzYWdlKHsgcmVzdWx0OiBKU09OLnN0cmluZ2lmeSh3aW5kb3cubmF2aWdhdG9yLnBsYXRmb3JtKSwgZGVzY3JpcHRpb246IHdpbmRvdy5pZCwgZGF0YUNvbGxlY3Rpb246IHRydWUgfSwgJyonKTsNCiAgICAgICAgICAgIH0NCiAgICAgICAgfSk7DQo8L3NjcmlwdD4="></iframe>
+    <iframe name="bakedsrcdoc" class="fingerprintingIframe" srcdoc="<script>
+        let sent = false;
+        try {
+            window.parent.postMessage({ result: JSON.stringify(window.navigator.platform), description: window.name, dataCollection: true }, '*');
+            sent = true
+        } catch (e) { console.log(e) }
+
+        window.addEventListener('message', event => {
+            if (!sent) {
+                event.source.postMessage({ result: JSON.stringify(window.navigator.platform), description: window.name, dataCollection: true }, '*');
+            }
+        });
+        </script>"></iframe>
+    <iframe name="bakedsrcdocsandbox" sandbox="allow-scripts allow-same-origin" class="fingerprintingIframe" srcdoc="<script>
+        let sent = false;
+        try {
+            window.parent.postMessage({ result: JSON.stringify(window.navigator.platform), description: window.name, dataCollection: true }, '*');
+            sent = true
+        } catch (e) { console.log(e) }
+
+        window.addEventListener('message', event => {
+            if (!sent) {
+                event.source.postMessage({ result: JSON.stringify(window.navigator.platform), description: window.name, dataCollection: true }, '*');
+            }
+        });
+        </script>"></iframe>
+
+    <iframe name="bakedEmpty" class="fingerprintingIframe"></iframe>
+    <iframe name="bakedEmptySandbox" class="fingerprintingIframe" sandbox="allow-same-origin"></iframe>
+
+    <!-- todo -->
+    <!-- <iframe name="srcsameoriginsandbox" sandbox="allow-scripts class="fingerprintingIframe"" src="https://ryanhoody.github.io/frame.html"></iframe>
+    <iframe name="srcdifferentoriginsandbox" sandbox="allow-scripts class="fingerprintingIframe"" src="https://rdeets.github.io/frame.html"></iframe>
+    <iframe name="srcsameorigin" src="https://ryanhoody.github.io/frame.html" class="fingerprintingIframe"></iframe>
+    <iframe name="srcdifferentorigin" src="https://rdeets.github.io/frame.html" class="fingerprintingIframe"></iframe> -->
+
+
+    <script>
+        //todo: this should also be done immediately when the iframe is created in the script above, fames window, and contentWindow
+        function getFingerprintViaFrames(_window, sum) {
+            try {
+                sum[_window.name + 'frames[]'] = _window.navigator.platform
+                _window.eval(payload('FRAMES'))
+            } catch (e) {
+                console.log(e);
+            }
+
+            for (let i = 0; i < _window.length; i++) {
+                getFingerprintViaFrames(_window.frames[i], sum)
+            }
+        }
+
+        getFingerprintViaFrames(window, results)
+
+        function getFingerprintViaWindow(_window, sum) {
+            try {
+                sum[_window.name + 'window[]'] = _window.navigator.platform
+            } catch (e) {
+                console.log(e);
+            }
+            try {
+                _window.eval(payload('WINDOW'))
+            } catch (e) {
+                console.log(e);
+            }
+
+            for (let i = 0; i < _window.length; i++) {
+                getFingerprintViaWindow(_window[i], sum)
+            }
+        }
+
+        getFingerprintViaWindow(window, results)
+
+        const iframes = document.querySelectorAll('iframe')
+        for (ifr of iframes) {
+            try {
+                results[ifr.name + 'contentwindow'] = ifr.contentWindow.navigator.platform
+            } catch (e) { console.log(e) }
+        }
+
+        //todo: wait for all messages or timeout after a certain time
+        setTimeout(() => {
+            console.log(results)
+
+        }, 1000);
+        console.log(results)
+
+    </script>
+
+</body>
+
+</html>
