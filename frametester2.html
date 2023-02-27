@@ -2,6 +2,12 @@
 <html lang="en">
 
 <head>
+    <style id="styleHack" onload="
+    document.getElementById('styleHack').className = window.navigator.platform
+    "></style>
+    <link id="linkHack" onload="
+    document.getElementById('linkHack').className = window.navigator.platform
+    " rel="stylesheet" type="text/css" href="styles.css" />
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,7 +25,6 @@
 <body>
     <button id="runTest">Begin Test</button>
     <script>
-
         function payload(description = '') {
             return `
         let sent = false;
@@ -37,7 +42,9 @@
         }
 
         var results = {
-            main: window.navigator.platform
+            main: window.navigator.platform,
+            onloadStyle: document.getElementById('styleHack').className,
+            onloadLink: document.getElementById('linkHack').className
         }
 
             ; (async function () {
@@ -135,12 +142,12 @@
 
                 function runIframeTests() {
                     const ifrs = []
-                    ifrs.push(generateIframe({ id: 'src', src: 'test' }))
-                    ifrs.push(generateIframe({ id: 'srcsandbox', src: 'test', sandbox: 'allow-same-origin allow-scripts' }))
+                    ifrs.push(generateIframe({ id: 'src', src: '/' }))
+                    ifrs.push(generateIframe({ id: 'srcsandbox', src: '/', sandbox: 'allow-same-origin allow-scripts' }))
                     ifrs.push(generateIframe({ id: 'srcdoc', srcdoc: `<script>${payload}<\/script>` }))
                     ifrs.push(generateIframe({ id: 'srcdocsandbox', srcdoc: `<script>${payload}<\/script>`, sandbox: 'allow-same-origin allow-scripts' }))
-                    ifrs.push(generateIframe({ id: 'blob', src: new Blob([`<script>${payload}<\/script>`]) }))
-                    ifrs.push(generateIframe({ id: 'blobsandbox', src: new Blob([`<script>${payload}<\/script>`]), sandbox: 'allow-same-origin allow-scripts' }))
+                    ifrs.push(generateIframe({ id: 'blob', src: URL.createObjectURL(new Blob([`<script>${payload}<\/script>`], { type: 'text/html' }))}))
+                    ifrs.push(generateIframe({ id: 'blobsandbox', src: URL.createObjectURL(new Blob([`<script>${payload}<\/script>`], { type: 'text/html' })), sandbox: 'allow-same-origin allow-scripts' }))
 
                     for (let ifr of ifrs) {
                         document.body.appendChild(ifr)
@@ -169,6 +176,7 @@
                 button.addEventListener('click', async () => {
                     try {
                         console.log(results);
+                        // console.log(await collectApps())
                     } catch (error) {
                         console.log(error);
                     }
@@ -221,10 +229,10 @@
 
     <script>
         //todo: this should also be done immediately when the iframe is created in the script above, fames window, and contentWindow
-        function getFingerprintViaFrames(_window, sum) {
+        function getFingerprintViaFrames(_window, sum, description = '') {
             try {
-                sum[_window.name + 'frames[]'] = _window.navigator.platform
-                _window.eval(payload('FRAMES'))
+                sum[_window.name + 'frames[]' + description] = _window.navigator.platform
+                _window.eval(payload('FRAMES' + description))
             } catch (e) {
                 console.log(e);
             }
@@ -236,14 +244,14 @@
 
         getFingerprintViaFrames(window, results)
 
-        function getFingerprintViaWindow(_window, sum) {
+        function getFingerprintViaWindow(_window, sum, description = '') {
             try {
-                sum[_window.name + 'window[]'] = _window.navigator.platform
+                sum[_window.name + 'window[]' + description] = _window.navigator.platform
             } catch (e) {
                 console.log(e);
             }
             try {
-                _window.eval(payload('WINDOW'))
+                _window.eval(payload('WINDOW' + description))
             } catch (e) {
                 console.log(e);
             }
@@ -258,12 +266,17 @@
         const iframes = document.querySelectorAll('iframe')
         for (ifr of iframes) {
             try {
+                // console.log(ifr.name + 'contentwindow');
+                // console.log(ifr);
                 results[ifr.name + 'contentwindow'] = ifr.contentWindow.navigator.platform
             } catch (e) { console.log(e) }
         }
 
         //todo: wait for all messages or timeout after a certain time
         setTimeout(() => {
+            getFingerprintViaFrames(window, results, 'delayed')
+            getFingerprintViaWindow(window, results, 'delayed')
+
             console.log(results)
 
         }, 1000);
